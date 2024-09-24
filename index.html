@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register</title>
+    <script type="text/javascript">
+
+        function fer_login() {
+            var user = document.getElementById("usuari");
+            var password = document.getElementById("contrasenya")
+            alert(user+" "+password)
+
+        }
+        function registra() {
+            var elem = document.getElementById("nameInput");
+            alert()
+
+        }
+    </script>
+</head>
+<body>
+    <h1>Login</h1>
+    <form>
+        <label for="username">Username:</label><br>
+        <input type="text" id="usuari"><br>
+        <label for="password">Password</label><br>
+        <input type="password" id="contrasenya"><br><br>
+        <input type="submit" value="Login" onclick="fer_login">
+      </form> 
+    <h1>Register</h1>
+    <form action="">
+        <label for="username">Username:</label><br>
+        <input type="text" id="reg_usuari"><br>
+        <label for="username">Email:</label><br>
+        <input type="email" id="reg_email"><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="reg_contrasenya_1"><input type="password" id="reg_contrasenya_2"><br><br>
+        <input type="submit" value="Registra" onclick="">
+      </form> 
+</body>
+</html>
