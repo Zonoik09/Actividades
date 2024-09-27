@@ -4,7 +4,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Task {
-    // -> es fa servir en expressions lambda per separar els paràmetres d'entrada del cos de la funció, i simplifica molt la implementació de funcions com Runnable o Callable a Java.
     public static Runnable task1(ConcurrentHashMap<String, Double> dades) {
         return () -> {
             System.out.println("Tasca 1: Iniciando operación bancaria...");
