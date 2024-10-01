@@ -7,77 +7,79 @@ public class Main {
     public static void main(String[] args) {
         double[] datos = {10, 12, 23, 23, 16, 23, 21, 16};
         // https://stackoverflow.com/questions/3964211/when-to-use-atomicreference-in-java
-        AtomicReference<Double> resultadoFinal = new AtomicReference<>((double) 0);
+
+        AtomicReference<Double> sumaTotal = new AtomicReference<>((double) 0);
         AtomicReference<Double> mediaTotal = new AtomicReference<>((double) 0);
-        // Creem un CyclicBarrier per a 3 fils
+        AtomicReference<Double> desviacionEstandarTotal = new AtomicReference<>((double) 0);
+
+        // Barrera para sincronizar las tareas
         CyclicBarrier barrier = new CyclicBarrier(3, new Runnable() {
             @Override
             public void run() {
-                System.out.println("Tots els microserveis han acabat. Combinant els resultats...\nResultat: "+resultadoFinal.get());
+                System.out.println("Varianza final: " + desviacionEstandarTotal.get());
             }
         });
 
-        // Executor per gestionar els fils
         ExecutorService executor = Executors.newFixedThreadPool(3);
 
-        // Tasques que simulen els microserveis
+        // Runnable para calcular la suma
         Runnable sumas = () -> {
+            double suma = 0;
+            System.out.println("Procesando datos... Realizando suma...");
+            for (double dato : datos) {
+                suma += dato;
+            }
+            sumaTotal.set(suma);
+            System.out.println("Suma completada: " + suma);
             try {
-                double suma = 0;
-                System.out.println("Procesando datos...Realizando suma...");
-                // Simulem un treball
-                for (int i = 0; i < datos.length;i++) {
-                    suma += datos[i];
-                }
-                resultadoFinal.set(suma);
-                System.out.println("La suma se ha completado.");
-                barrier.await(); // Esperem que els altres fils acabin
+                barrier.await();
+                barrier.await();
+                barrier.await();
             } catch (InterruptedException | BrokenBarrierException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         };
 
+        // Runnable para calcular la media
         Runnable media = () -> {
             try {
-                System.out.println("Procesando datos...Realizando media...");
-                double operation = resultadoFinal.get()/ datos.length;
-                System.out.println(operation);
-                mediaTotal.set(operation);
-                System.out.println("Media realizada con exito...");
                 barrier.await();
-            } catch (InterruptedException | BrokenBarrierException e) {
-                e.printStackTrace();
+                System.out.println("Procesando datos... Realizando media...");
+                double operation = sumaTotal.get() / datos.length;
+                System.out.println("Media realizada con éxito: " + operation);
+                mediaTotal.set(operation);
+                barrier.await();
+                barrier.await();
+            } catch (BrokenBarrierException | InterruptedException e) {
+                throw new RuntimeException(e);
             }
         };
 
+        // Runnable para calcular la varianza
         Runnable varianza = () -> {
             try {
-                System.out.println("Procesando datos...Realizando desviación standard");
-                double sumaDiferencia = 0.0;
-                double potenciados = 0;
-                double sumaPotenciada = 0;
-                for (double dato: datos) {
-                    System.out.println(resultadoFinal);
-                    sumaDiferencia = 0;
-                    potenciados = Math.pow(dato - mediaTotal.get(),2);
-                    sumaPotenciada += potenciados;
-                }
-
-                resultadoFinal.set(sumaPotenciada);
-                System.out.println("Proceso terminado... Desviacion standard terminada.");
                 barrier.await();
-            } catch (InterruptedException | BrokenBarrierException e) {
-                e.printStackTrace();
+                barrier.await();
+                System.out.println("Procesando datos... Realizando varianza...");
+                double sumaDiferencia = 0.0;
+                for (double dato : datos) {
+                    sumaDiferencia += Math.pow(dato - mediaTotal.get(), 2);
+                }
+                double varianzas = sumaDiferencia / datos.length;
+                desviacionEstandarTotal.set(varianzas);
+                System.out.println("Proceso terminado... Varianza calculada. \nTodos los servicios terminados");
+                barrier.await();
+            } catch (BrokenBarrierException | InterruptedException e) {
+                throw new RuntimeException(e);
             }
         };
 
-        // Executem les tasques
+        // Ejecutar las tareas
         executor.submit(sumas);
         executor.submit(media);
         executor.submit(varianza);
 
-        // Tanquem l'executor
+        // Cerrar el executor
         executor.shutdown();
     }
-
 }
